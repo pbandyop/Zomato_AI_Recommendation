@@ -122,6 +122,20 @@ Recommended flow (also set in `frontend/vercel.json`):
 
 ---
 
+## Troubleshooting: “Failed to fetch” / API shows `http://127.0.0.1:8000`
+
+**Cause:** `NEXT_PUBLIC_API_BASE_URL` was **not defined when Vercel ran `npm run build`**. The client bundle then falls back to localhost; the browser on the public internet cannot reach your machine.
+
+**Fix:**
+
+1. Vercel → **Project → Settings → Environment Variables** → add **`NEXT_PUBLIC_API_BASE_URL`** = `https://<your-render-service>.onrender.com` (no **`/`** at the end).
+2. Apply it to **Production** (and **Preview** / **Development** if you use those deployments).
+3. **Redeploy** (trigger a **new build**, e.g. *Deployments → Redeploy*) — **`NEXT_PUBLIC_*` is inlined at build time**, so changing env vars alone does **not** update existing built JS until the next build finishes.
+4. After redeploy, the error/help text should show your Render URL instead of `127.0.0.1`.
+5. If requests reach Render but fail CORS, add your **`https://…vercel.app`** origin on Render (**`CORS_ORIGINS`** and/or **`CORS_ORIGIN_REGEX`** for previews).
+
+---
+
 ## `render.yaml` (in this repo)
 
 The repository root includes **`render.yaml`** for a [Render Blueprint](https://render.com/docs/infrastructure-as-code): Python web service, `pip install`, `uvicorn` on `$PORT`, `/health`. Adjust **`region`** / **`plan`** / **`name`** as needed.

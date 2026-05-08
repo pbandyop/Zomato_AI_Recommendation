@@ -2,7 +2,10 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
-import { getPublicApiBaseUrl } from "@/lib/publicApi";
+import {
+  getPublicApiBaseUrl,
+  isDeployedSiteUsingLocalApiFallback,
+} from "@/lib/publicApi";
 
 type Rec = {
   rank: number;
@@ -29,6 +32,7 @@ type ApiResponse = {
 const API_BASE = getPublicApiBaseUrl();
 
 export default function Home() {
+  const [prodApiMisconfigured, setProdApiMisconfigured] = useState(false);
   const [location, setLocation] = useState("Bangalore");
   const [budget, setBudget] = useState("medium");
   const [cuisinesInput, setCuisinesInput] = useState("North Indian, Chinese");
@@ -60,6 +64,10 @@ export default function Home() {
       body: JSON.stringify(body),
     });
   }
+
+  useEffect(() => {
+    setProdApiMisconfigured(isDeployedSiteUsingLocalApiFallback());
+  }, []);
 
   useEffect(() => {
     if (!data || !recommendationRunId) return;
@@ -134,6 +142,22 @@ export default function Home() {
         Tell us where you are and what you like — we’ll suggest restaurants with
         short AI explanations.
       </p>
+
+      {prodApiMisconfigured && (
+        <div className="banner" role="status">
+          <strong>Production API URL is missing at build time.</strong> This
+          app is calling <code>{API_BASE}</code>, which only works on your
+          laptop. In Vercel → <strong>Settings → Environment Variables</strong>,
+          set <code>NEXT_PUBLIC_API_BASE_URL</code> to your Render URL (HTTPS,
+          no trailing slash) for <strong>Production</strong>{" "}
+          <em>and</em> Preview if you use previews. Then open{" "}
+          <strong>Deployments → … → Redeploy</strong> so the site{" "}
+          <strong>rebuilds</strong> — Next.js bakes <code>NEXT_PUBLIC_*</code>{" "}
+          in at compile time (a plain refresh is not enough). Ensure Render{" "}
+          <code>CORS_ORIGINS</code> / <code>CORS_ORIGIN_REGEX</code> allows this
+          Vercel origin.
+        </div>
+      )}
 
       <div className="card">
         <form onSubmit={onSubmit}>
