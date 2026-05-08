@@ -29,9 +29,6 @@ type Rec = {
 
 type ApiResponse = {
   recommendations: Rec[];
-  preferences_summary: Record<string, unknown>;
-  model: string;
-  guardrail_notes?: string[];
 };
 
 export default function Home() {
@@ -345,12 +342,6 @@ export default function Home() {
               </article>
             ))
           )}
-
-          <p
-            style={{ fontSize: "0.8rem", color: "#8a7d72", marginTop: "2rem" }}
-          >
-            Model: {data.model}
-          </p>
         </section>
       )}
     </main>

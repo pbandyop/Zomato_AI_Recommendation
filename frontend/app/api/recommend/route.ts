@@ -6,6 +6,20 @@ export const runtime = "nodejs";
 
 const TIMEOUT_MS = 120_000;
 
+/** Remove retrieval fallback tags so stale client bundles cannot show the old fallback banner. */
+function stripAppliedFallbacksFromJsonBody(raw: ArrayBuffer): BodyInit {
+  try {
+    const text = new TextDecoder().decode(raw);
+    const parsed = JSON.parse(text) as Record<string, unknown>;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return raw;
+    if (!("applied_fallbacks" in parsed)) return raw;
+    delete parsed.applied_fallbacks;
+    return JSON.stringify(parsed);
+  } catch {
+    return raw;
+  }
+}
+
 function backendNotConfiguredResponse() {
   return NextResponse.json(
     {
@@ -22,7 +36,7 @@ export async function POST(req: NextRequest) {
     return backendNotConfiguredResponse();
   }
 
-  const body = await req.text();
+  const requestPayload = await req.text();
 
   let upstream: Response;
   try {
@@ -32,7 +46,7 @@ export async function POST(req: NextRequest) {
         "Content-Type": req.headers.get("content-type") || "application/json",
         Accept: "application/json",
       },
-      body,
+      body: requestPayload,
       cache: "no-store",
       signal: abortAfter(TIMEOUT_MS),
     });
@@ -43,12 +57,22 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const out = new NextResponse(await upstream.arrayBuffer(), {
+  const raw = await upstream.arrayBuffer();
+  const ct = upstream.headers.get("content-type") ?? "";
+
+  let responseBody: BodyInit = raw;
+  if (upstream.ok && ct.includes("application/json")) {
+    const stripped = stripAppliedFallbacksFromJsonBody(raw);
+    if (typeof stripped === "string") responseBody = stripped;
+  }
+
+  const out = new NextResponse(responseBody, {
     status: upstream.status,
   });
 
-  const ct = upstream.headers.get("content-type");
-  if (ct) out.headers.set("Content-Type", ct);
+  if (typeof responseBody === "string") {
+    out.headers.set("Content-Type", "application/json; charset=utf-8");
+  } else if (ct) out.headers.set("Content-Type", ct);
 
   for (const h of [
     "X-Recommendation-Run-Id",
