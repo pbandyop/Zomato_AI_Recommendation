@@ -1,0 +1,37 @@
+# Environment & secrets
+.env
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+htmlcov/
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+*.log
+
+# Local runtime / DB
+logs/*.db
+logs/*.sqlite3
+
+# Raw Hugging Face export (often >100MB — GitHub limit). Regenerate: `python -m src.phase1.data_foundation`
+data/raw/*.csv
+!data/raw/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

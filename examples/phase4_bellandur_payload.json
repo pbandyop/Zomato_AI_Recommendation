@@ -1,0 +1,9 @@
+{
+  "location": "Bellandur",
+  "budget": "high",
+  "cuisines": ["North Indian", "Chinese", "Continental"],
+  "minimum_rating": 4.0,
+  "additional_preferences": [
+    "approximate cost around 2000 for two people"
+  ]
+}

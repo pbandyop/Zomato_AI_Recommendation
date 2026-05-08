@@ -1,0 +1,48 @@
+{
+  "274afc7e-5a0e-4e95-8d4d-3a28b780ed15": {
+    "session_id": "274afc7e-5a0e-4e95-8d4d-3a28b780ed15",
+    "created_at": "2026-05-07T20:58:56.008726+00:00",
+    "updated_at": "2026-05-07T20:58:56.008726+00:00",
+    "preferences": {
+      "location": "bangalore",
+      "budget": "medium",
+      "cuisines": [
+        "chinese",
+        "north indian"
+      ],
+      "minimum_rating": 4.0,
+      "additional_preferences": [
+        "family-friendly",
+        "quick service"
+      ]
+    }
+  },
+  "fa860a79-3dc9-4e6c-9e29-4512f279cd11": {
+    "session_id": "fa860a79-3dc9-4e6c-9e29-4512f279cd11",
+    "created_at": "2026-05-07T23:37:22.882788+00:00",
+    "updated_at": "2026-05-07T23:37:22.882788+00:00",
+    "preferences": {
+      "location": "delhi",
+      "budget": "medium",
+      "cuisines": [
+        "north indian"
+      ],
+      "minimum_rating": 4.0,
+      "additional_preferences": []
+    }
+  },
+  "53eab91d-0680-479c-8d7a-16beda1b9019": {
+    "session_id": "53eab91d-0680-479c-8d7a-16beda1b9019",
+    "created_at": "2026-05-08T18:52:46.374977+00:00",
+    "updated_at": "2026-05-08T18:52:46.374977+00:00",
+    "preferences": {
+      "location": "delhi",
+      "budget": "medium",
+      "cuisines": [
+        "north indian"
+      ],
+      "minimum_rating": 4.0,
+      "additional_preferences": []
+    }
+  }
+}

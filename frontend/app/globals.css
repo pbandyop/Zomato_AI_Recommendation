@@ -1,0 +1,245 @@
+*::-webkit-scrollbar {
+  width: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #c4bcb5;
+  border-radius: 4px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.45;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(165deg, #fdf8f3 0%, #f5efe8 45%, #fff 100%);
+  color: #2b2118;
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.35rem;
+}
+
+.lead {
+  color: #5c5047;
+  margin: 0 0 1.75rem;
+  font-size: 1.05rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.35rem 1.4rem;
+  box-shadow: 0 4px 24px rgba(43, 33, 24, 0.08);
+  border: 1px solid rgba(230, 118, 80, 0.12);
+}
+
+label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4a3f36;
+  margin-bottom: 0.35rem;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #d8cfc4;
+  border-radius: 10px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  background: #fffdf9;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #e67650;
+  outline-offset: 1px;
+  border-color: #e67650;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1rem;
+}
+
+@media (max-width: 560px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+}
+
+button.primary {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #e64c2e 0%, #c73d24 100%);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 16px rgba(230, 76, 46, 0.35);
+}
+
+button.primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.banner {
+  background: #fff6ed;
+  border: 1px solid #f0c9a0;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  margin: 1.25rem 0;
+  font-size: 0.92rem;
+  color: #6b4d2e;
+}
+
+.error {
+  background: #fff0f0;
+  border-color: #e8a8a8;
+  color: #7a2d2d;
+}
+
+.results h2 {
+  font-size: 1.35rem;
+  margin: 2rem 0 1rem;
+}
+
+.rec-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.2rem 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(43, 33, 24, 0.08);
+  box-shadow: 0 2px 12px rgba(43, 33, 24, 0.06);
+}
+
+.rec-card header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.rank {
+  flex-shrink: 0;
+  background: #e67650;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 8px;
+}
+
+.rec-card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  flex: 1;
+}
+
+.meta {
+  font-size: 0.88rem;
+  color: #6b5d52;
+  margin-bottom: 0.5rem;
+}
+
+.cuisines {
+  font-size: 0.82rem;
+  color: #7a6e65;
+  margin-bottom: 0.65rem;
+}
+
+.explanation {
+  font-size: 0.95rem;
+  color: #3d342c;
+  background: #faf6f2;
+  padding: 0.75rem 0.85rem;
+  border-radius: 10px;
+  border-left: 3px solid #e67650;
+  margin-top: 0.35rem;
+}
+
+.confidence {
+  font-size: 0.8rem;
+  color: #5c5047;
+  margin-top: 0.5rem;
+}
+
+.rec-feedback {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+  align-items: center;
+}
+
+.rec-feedback button.ghost {
+  width: auto;
+  margin: 0;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #5c5047;
+  background: #faf6f2;
+  border: 1px solid #d8cfc4;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.rec-feedback button.ghost:hover {
+  background: #fff;
+  border-color: #e67650;
+  color: #2b2118;
+}
+
+.skeleton-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.skel {
+  height: 88px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #eee8e1 25%, #f5efe8 50%, #eee8e1 75%);
+  background-size: 200% 100%;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}

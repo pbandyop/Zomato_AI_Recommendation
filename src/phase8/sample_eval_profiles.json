@@ -1,0 +1,32 @@
+[
+  {
+    "id": "bangalore-medium-north-indian",
+    "preferences": {
+      "location": "Bangalore",
+      "budget": "medium",
+      "cuisines": ["north indian", "chinese"],
+      "minimum_rating": 4.0,
+      "additional_preferences": []
+    }
+  },
+  {
+    "id": "delhi-low-rating-soft",
+    "preferences": {
+      "location": "Delhi",
+      "budget": "low",
+      "cuisines": ["fast food"],
+      "minimum_rating": 3.5,
+      "additional_preferences": []
+    }
+  },
+  {
+    "id": "mumbai-high-italian",
+    "preferences": {
+      "location": "Mumbai",
+      "budget": "high",
+      "cuisines": ["italian", "continental"],
+      "minimum_rating": 4.2,
+      "additional_preferences": ["date night"]
+    }
+  }
+]
