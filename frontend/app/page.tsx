@@ -3,9 +3,15 @@
 import { FormEvent, useEffect, useState } from "react";
 
 import {
+  explainRecommendFetchFailure,
+  publicApiAbortSignal,
+} from "@/lib/apiFetch";
+import {
   getPublicApiBaseUrl,
   isDeployedSiteUsingLocalApiFallback,
 } from "@/lib/publicApi";
+
+const TROUBLESHOOT_API_ORIGIN = getPublicApiBaseUrl();
 
 type Rec = {
   rank: number;
@@ -28,8 +34,6 @@ type ApiResponse = {
   model: string;
   guardrail_notes?: string[];
 };
-
-const API_BASE = getPublicApiBaseUrl();
 
 export default function Home() {
   const [prodApiMisconfigured, setProdApiMisconfigured] = useState(false);
@@ -58,7 +62,7 @@ export default function Home() {
       event_type: payload.event_type,
       client_meta: payload.client_meta ?? {},
     };
-    void fetch(`${API_BASE}/api/v1/feedback`, {
+    void fetch("/api/feedback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -101,7 +105,7 @@ export default function Home() {
     if (extras.length) preferences.additional_preferences = extras;
 
     try {
-      const res = await fetch(`${API_BASE}/api/v1/recommend`, {
+      const res = await fetch("/api/recommend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -109,14 +113,22 @@ export default function Home() {
           max_candidates: 30,
           top_n: 10,
         }),
+        signal: publicApiAbortSignal(),
       });
 
       if (!res.ok) {
         const text = await res.text();
+        let message = text.slice(0, 400);
+        try {
+          const j = JSON.parse(text) as { detail?: unknown };
+          if (typeof j.detail === "string") message = j.detail;
+        } catch {
+          /* use raw slice */
+        }
         throw new Error(
           res.status === 422
-            ? `Invalid input: ${text}`
-            : `API ${res.status}: ${text.slice(0, 200)}`
+            ? `Invalid input: ${message}`
+            : `Request failed (${res.status}): ${message}`
         );
       }
 
@@ -125,11 +137,7 @@ export default function Home() {
       const runHeader = res.headers.get("X-Recommendation-Run-Id");
       if (runHeader) setRecommendationRunId(runHeader);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong. Is the API running?"
-      );
+      setError(explainRecommendFetchFailure(TROUBLESHOOT_API_ORIGIN, err));
     } finally {
       setLoading(false);
     }
@@ -145,17 +153,18 @@ export default function Home() {
 
       {prodApiMisconfigured && (
         <div className="banner" role="status">
-          <strong>Production API URL is missing at build time.</strong> This
-          app is calling <code>{API_BASE}</code>, which only works on your
-          laptop. In Vercel → <strong>Settings → Environment Variables</strong>,
-          set <code>NEXT_PUBLIC_API_BASE_URL</code> to your Render URL (HTTPS,
-          no trailing slash) for <strong>Production</strong>{" "}
-          <em>and</em> Preview if you use previews. Then open{" "}
-          <strong>Deployments → … → Redeploy</strong> so the site{" "}
-          <strong>rebuilds</strong> — Next.js bakes <code>NEXT_PUBLIC_*</code>{" "}
-          in at compile time (a plain refresh is not enough). Ensure Render{" "}
-          <code>CORS_ORIGINS</code> / <code>CORS_ORIGIN_REGEX</code> allows this
-          Vercel origin.
+          <strong>Production backend URL looks wrong for Vercel.</strong> The
+          browser calls same-origin <code>/api/recommend</code>; the Next.js
+          server proxies to Render using <code>API_BACKEND_ORIGIN</code>{" "}
+          (preferred, not sent to the browser) or{" "}
+          <code>NEXT_PUBLIC_API_BASE_URL</code>. Your env currently resolves to{" "}
+          <code>{TROUBLESHOOT_API_ORIGIN}</code>, which only works on your
+          laptop. In Vercel → Settings → Environment Variables set one of those
+          keys to your Render HTTPS origin (no trailing slash) for Production
+          (and Preview if you use it), then redeploy.{" "}
+          <code>NEXT_PUBLIC_*</code> is inlined at build time; server-only{" "}
+          <code>API_BACKEND_ORIGIN</code> takes effect after redeploy without
+          relying on the public prefix.
         </div>
       )}
 
@@ -236,13 +245,17 @@ export default function Home() {
         <div className="banner error" role="alert">
           {error}
           <div style={{ marginTop: "0.5rem", fontSize: "0.85rem" }}>
-            API: <code>{API_BASE}</code>
+            Route: <code>/api/recommend</code> (Vercel → Render, server-side).
+            <br />
+            Wake or check API:{" "}
+            <code>{TROUBLESHOOT_API_ORIGIN.replace(/\/+$/, "")}/health</code>
             <br />
             Local backend:{" "}
             <code>uvicorn src.phase6.app:http_app --reload --port 8000</code>
             <br />
-            Vercel: set <code>NEXT_PUBLIC_API_BASE_URL</code> to your Render URL
-            (no trailing slash).
+            Vercel env: <code>API_BACKEND_ORIGIN</code> or{" "}
+            <code>NEXT_PUBLIC_API_BASE_URL</code> = Render URL (no trailing
+            slash), then redeploy.
           </div>
         </div>
       )}

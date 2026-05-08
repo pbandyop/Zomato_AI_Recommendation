@@ -1,9 +1,9 @@
 /**
- * Public (browser) origin for the Phase 6 API.
- * Must match `NEXT_PUBLIC_API_BASE_URL` on Vercel — no trailing slash (see docs/deployment-render-vercel.md).
+ * Normalized Phase 6 API origin from `NEXT_PUBLIC_API_BASE_URL` (no trailing slash).
+ * The browser posts to `/api/recommend`; Next.js proxies to `${origin}/api/v1/recommend`.
+ * Prefer server-only `API_BACKEND_ORIGIN` on Vercel (see `docs/deployment-render-vercel.md`).
  *
- * Important: Next.js inlines `NEXT_PUBLIC_*` at **build time**. Changing the variable in Vercel
- * requires a new deployment (rebuild), not only a browser refresh.
+ * Important: Next.js inlines `NEXT_PUBLIC_*` at **build time** for the browser bundle too.
  */
 export function getPublicApiBaseUrl(): string {
   const fallback = "http://127.0.0.1:8000";
