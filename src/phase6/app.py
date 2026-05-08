@@ -87,6 +87,17 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     )
 
 
+@http_app.get("/")
+def root():
+    """Base URL hit in the browser otherwise returns FastAPI's default JSON 404."""
+    return {
+        "service": http_app.title,
+        "hint": "No resource at /. Use GET /health, POST /api/v1/recommend, or /docs.",
+        "health": "/health",
+        "openapi_docs": "/docs",
+    }
+
+
 @http_app.get("/health")
 def health_check(request: Request):
     cfg = request.app.state.config
