@@ -28,7 +28,8 @@ Artifacts live in-repo:
 
 | Artifact | Purpose |
 |----------|---------|
-| `streamlit_app/app.py` | Streamlit UI (preference form + results). |
+| `streamlit_app.py` | **Default entry** for Streamlit Cloud / `streamlit run`. |
+| `streamlit_app/app.py` | Streamlit UI implementation (form + results). |
 | `.streamlit/config.toml` | Server bind (`0.0.0.0:8501`), headless defaults. |
 | `Dockerfile.streamlit` | Immutable image with app + pinned deps from `requirements.txt`. |
 | `docker-compose.streamlit.yml` | Optional **API + Streamlit** stack (UI uses `STREAMLIT_BACKEND=api`). |
@@ -49,7 +50,7 @@ Local (repo root):
 
 ```bash
 pip install -r requirements.txt
-streamlit run streamlit_app/app.py
+streamlit run streamlit_app.py
 ```
 
 Single container (`local` backend inside the container):

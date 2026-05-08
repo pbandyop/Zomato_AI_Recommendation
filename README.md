@@ -12,7 +12,8 @@ This repository contains a phased implementation of an AI-powered restaurant rec
 - `src/phase4/`: Groq LLM ranking, structured response parsing, guardrails
 - `src/phase6/`: FastAPI backend (Phase 6) — API, orchestration, CORS, rate limits
 - `frontend/`: Next.js UI — form + recommendation cards calling the API
-- `streamlit_app/`: Streamlit UI — alternate client + Docker deploy target (see `docs/streamlit-deployment-phase.md`)
+- `streamlit_app.py`: default Streamlit entry (Streamlit Cloud); runs `streamlit_app/app.py`
+- `streamlit_app/`: Streamlit UI implementation + Docker deploy target (see `docs/streamlit-deployment-phase.md`)
 - `tests/phase0/` … `tests/phase6/`: phase-wise tests
 
 ## Phase 0 (Implemented)
@@ -180,7 +181,7 @@ Standalone UI powered by **`streamlit`**, using the **same recommendation pipeli
 
 ```bash
 pip install -r requirements.txt
-streamlit run streamlit_app/app.py
+streamlit run streamlit_app.py
 ```
 
 Open **http://localhost:8501**. Sidebar: switch **local** vs **api** and set **`STREAMLIT_API_BASE_URL`** when pointing at FastAPI.
