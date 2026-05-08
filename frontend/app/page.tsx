@@ -29,6 +29,7 @@ type Rec = {
 
 type ApiResponse = {
   recommendations: Rec[];
+  availability_message?: string | null;
 };
 
 export default function Home() {
@@ -260,7 +261,12 @@ export default function Home() {
         <section className="results">
           <h2>Top picks for you</h2>
           {data.recommendations.length === 0 ? (
-            <p>No recommendations returned. Try relaxing filters.</p>
+            <div className="banner" role="status">
+              <p style={{ margin: 0 }}>
+                {data.availability_message?.trim() ||
+                  "No recommendations returned. Try relaxing filters."}
+              </p>
+            </div>
           ) : (
             data.recommendations.map((r) => (
               <article

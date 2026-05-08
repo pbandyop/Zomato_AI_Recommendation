@@ -24,13 +24,20 @@ def run_phase4_recommendation(
     cfg = config or load_config()
 
     if not retrieval.candidates:
+        tags: tuple[str, ...] = ()
+        msg = retrieval.availability_message
+        if msg:
+            tags = ("no_matching_cuisine",)
+        else:
+            tags = ("no_candidates",)
         return Phase4Result(
             recommendations=[],
             applied_fallbacks=list(retrieval.applied_fallbacks),
             preferences_summary=dict(retrieval.preferences_summary),
             model=cfg.groq_model,
-            guardrail_notes=("no_candidates",),
+            guardrail_notes=tags,
             raw_llm_content=None,
+            availability_message=msg,
         )
 
     messages = build_ranking_messages(

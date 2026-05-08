@@ -20,6 +20,8 @@ def _result_to_dict(result, *, include_raw: bool) -> dict:
         "model": result.model,
         "guardrail_notes": list(result.guardrail_notes),
     }
+    if result.availability_message:
+        payload["availability_message"] = result.availability_message
     if include_raw:
         payload["raw_llm_content"] = result.raw_llm_content
     return payload

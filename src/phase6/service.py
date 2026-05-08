@@ -31,6 +31,8 @@ def phase4_result_to_api_dict(result: Phase4Result, *, include_raw: bool) -> dic
         "model": result.model,
         "guardrail_notes": list(result.guardrail_notes),
     }
+    if result.availability_message:
+        payload["availability_message"] = result.availability_message
     if include_raw:
         payload["raw_llm_content"] = result.raw_llm_content
     return payload

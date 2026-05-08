@@ -28,3 +28,4 @@ class Phase4Result:
     model: str
     guardrail_notes: tuple[str, ...] = ()
     raw_llm_content: str | None = None
+    availability_message: str | None = None

@@ -70,7 +70,7 @@ def test_apply_rule_based_filters_strict() -> None:
     assert int(out.iloc[0]["record_id"]) == 1
 
 
-def test_retrieve_candidates_falls_back_when_cuisine_mismatch() -> None:
+def test_retrieve_candidates_no_cross_cuisine_when_strict_empty() -> None:
     df = _sample_df()
     prefs = UserPreferences.model_validate(
         {
@@ -80,12 +80,13 @@ def test_retrieve_candidates_falls_back_when_cuisine_mismatch() -> None:
             "minimum_rating": 4.0,
         }
     )
-    # Strict: wants north indian + low budget + bangalore + rating>=4 -> row 2 is south indian only
+    # Strict: north indian + low + bangalore + rating>=4 matches nothing; south-indian row matches if cuisine ignored
     result = retrieve_candidates(df, prefs, max_candidates=10)
-    assert result.candidate_count_before_cap >= 1
-    assert result.applied_fallbacks == ["relaxed_cuisine"]
-    ids = {c["record_id"] for c in result.candidates}
-    assert 2 in ids
+    assert result.candidates == []
+    assert result.applied_fallbacks == ["cuisine_not_available"]
+    assert result.availability_message == (
+        "Restaurant with the 'north indian' cuisine is not available."
+    )
 
 
 def test_retrieve_empty_dataframe() -> None:

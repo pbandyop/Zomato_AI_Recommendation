@@ -32,6 +32,7 @@ class RetrievalResult:
     applied_fallbacks: list[str]
     candidate_count_before_cap: int
     preferences_summary: dict
+    availability_message: str | None = None
 
 
 @dataclass
@@ -133,6 +134,7 @@ def retrieve_candidates(
             applied_fallbacks=["empty_dataset"],
             candidate_count_before_cap=0,
             preferences_summary=_prefs_summary(preferences),
+            availability_message=None,
         )
 
     required_cols = {
@@ -149,24 +151,49 @@ def retrieve_candidates(
         raise ValueError(f"DataFrame missing required columns: {sorted(missing)}")
 
     working = df.copy()
-    applied: list[str] = []
-    selected: pd.DataFrame | None = None
+    attempts = _build_fallback_attempts(preferences)
 
-    for attempt in _build_fallback_attempts(preferences):
-        filtered = apply_rule_based_filters(working, preferences, attempt.options)
-        if len(filtered) > 0:
-            selected = filtered
-            applied = [attempt.label]
+    strict_filtered = apply_rule_based_filters(working, preferences, attempts[0].options)
+    if len(strict_filtered) > 0:
+        selected = strict_filtered
+        applied = [attempts[0].label]
+        logger.info(
+            "Retrieval succeeded with strategy=%s rows=%s",
+            attempts[0].label,
+            len(strict_filtered),
+        )
+    else:
+        cuisine_relaxed = apply_rule_based_filters(working, preferences, attempts[1].options)
+        if len(cuisine_relaxed) > 0:
+            message = _cuisine_not_available_message(preferences.cuisines)
             logger.info(
-                "Retrieval succeeded with strategy=%s rows=%s",
-                attempt.label,
-                len(filtered),
+                "Strict retrieval empty but rows exist without cuisine match; skipping cross-cuisine results"
             )
-            break
+            return RetrievalResult(
+                candidates=[],
+                applied_fallbacks=["cuisine_not_available"],
+                candidate_count_before_cap=0,
+                preferences_summary=_prefs_summary(preferences),
+                availability_message=message,
+            )
 
-    if selected is None:
-        selected = working.iloc[0:0].copy()
-        applied = ["no_matches"]
+        applied: list[str] = []
+        selected: pd.DataFrame | None = None
+        for attempt in attempts[2:]:
+            filtered = apply_rule_based_filters(working, preferences, attempt.options)
+            if len(filtered) > 0:
+                selected = filtered
+                applied = [attempt.label]
+                logger.info(
+                    "Retrieval succeeded with strategy=%s rows=%s",
+                    attempt.label,
+                    len(filtered),
+                )
+                break
+
+        if selected is None:
+            selected = working.iloc[0:0].copy()
+            applied = ["no_matches"]
 
     scored = add_retrieval_scores(selected, preferences)
     ranked = sort_by_match_score(scored)
@@ -178,7 +205,18 @@ def retrieve_candidates(
         applied_fallbacks=applied,
         candidate_count_before_cap=count_before_cap,
         preferences_summary=_prefs_summary(preferences),
+        availability_message=None,
     )
+
+
+def _cuisine_not_available_message(cuisines: list[str]) -> str:
+    parts = [c.strip() for c in cuisines if c and str(c).strip()]
+    if not parts:
+        return "Restaurant with your requested cuisine is not available."
+    if len(parts) == 1:
+        return f"Restaurant with the '{parts[0]}' cuisine is not available."
+    labels = "', '".join(parts)
+    return f"Restaurant with the '{labels}' cuisines is not available."
 
 
 def _prefs_summary(preferences: UserPreferences) -> dict:
