@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import uuid
 from contextlib import asynccontextmanager
 
@@ -52,6 +53,7 @@ http_app = FastAPI(
 http_app.add_middleware(
     CORSMiddleware,
     allow_origins=list(_cfg.cors_origins),
+    allow_origin_regex=_cfg.cors_origin_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -93,6 +95,8 @@ def health_check(request: Request):
     checks["restaurant_rows"] = str(len(request.app.state.restaurant_df))
     checks["prompt_version"] = cfg.prompt_version
     checks["feedback_db"] = str(cfg.feedback_sqlite_path)
+    checks["cors_origin_regex"] = str(bool(cfg.cors_origin_regex))
+    checks["render_hosted"] = str(os.getenv("RENDER", "").lower() == "true")
     return checks
 
 

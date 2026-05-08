@@ -33,3 +33,5 @@ uvicorn src.phase6.app:http_app --host 127.0.0.1 --port 8000
 npm run build
 npm start
 ```
+
+For **Vercel** + **Render** API, follow [`docs/deployment-render-vercel.md`](../docs/deployment-render-vercel.md).

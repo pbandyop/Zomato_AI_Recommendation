@@ -78,6 +78,8 @@ def test_health_includes_dataset_and_groq_flags(monkeypatch) -> None:
     assert "groq_configured" in body
     assert "prompt_version" in body
     assert "feedback_db" in body
+    assert "cors_origin_regex" in body
+    assert "render_hosted" in body
 
 
 def test_recommend_with_preferences(monkeypatch) -> None:

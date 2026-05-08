@@ -12,9 +12,9 @@ This repository contains a phased implementation of an AI-powered restaurant rec
 - `src/phase4/`: Groq LLM ranking, structured response parsing, guardrails
 - `src/phase6/`: FastAPI backend (Phase 6) — API, orchestration, CORS, rate limits
 - `frontend/`: Next.js UI — form + recommendation cards calling the API
-- `streamlit_app.py`: default Streamlit entry (Streamlit Cloud); runs `streamlit_app/app.py`
-- `streamlit_app/`: Streamlit UI implementation + Docker deploy target (see `docs/streamlit-deployment-phase.md`)
 - `tests/phase0/` … `tests/phase6/`: phase-wise tests
+
+Production deployment (Render backend + Vercel frontend): see **`docs/deployment-render-vercel.md`**.
 
 ## Phase 0 (Implemented)
 
@@ -149,11 +149,13 @@ uvicorn src.phase6.app:http_app --reload --host 127.0.0.1 --port 8000
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/health` | Phase 0-style checks + `groq_configured` + `restaurant_rows` |
+| `GET` | `/health` | Phase 0-style checks + `groq_configured` + `restaurant_rows` + `render_hosted` / `cors_origin_regex` flags |
 | `POST` | `/api/v1/sessions` | Body: Phase 2 preferences JSON → `{ "session_id": "..." }` |
 | `POST` | `/api/v1/recommend` | Body: `{ "preferences": {...} }` **or** `{ "session_id": "..." }`, plus optional `max_candidates`, `top_n`, `include_raw_llm` |
 
-**Environment** (see `.env.example`): `CORS_ORIGINS`, `API_RATE_LIMIT_PER_MINUTE`, `GROQ_API_KEY`, `GROQ_MODEL`, `APP_ENV` (`production` hides internal error details).
+**Environment** (see `.env.example`): `CORS_ORIGINS`, optional `CORS_ORIGIN_REGEX` (e.g. Vercel previews), `API_RATE_LIMIT_PER_MINUTE`, `GROQ_API_KEY`, `GROQ_MODEL`, `APP_ENV` (`production` hides internal error details).
+
+**Render:** root **`render.yaml`** defines the Python web service (`uvicorn`, `$PORT`, `/health`). Full checklist: **`docs/deployment-render-vercel.md`**.
 
 **Example (recommend with inline preferences):**
 
@@ -174,26 +176,6 @@ npm run dev
 ```
 
 Then open [http://localhost:3000](http://localhost:3000). See `frontend/README.md` for details.
-
-## Run Streamlit (Streamlit deployment phase)
-
-Standalone UI powered by **`streamlit`**, using the **same recommendation pipeline** as the API (`local`) or **`POST /api/v1/recommend`** (`api`).
-
-```bash
-pip install -r requirements.txt
-streamlit run streamlit_app.py
-```
-
-Open **http://localhost:8501**. Sidebar: switch **local** vs **api** and set **`STREAMLIT_API_BASE_URL`** when pointing at FastAPI.
-
-**Environment** (also in `.env.example`):
-
-| Variable | Description |
-|---------|--------------|
-| `STREAMLIT_BACKEND` | `local` (default) — in-process; `api` — HTTP to Phase 6. |
-| `STREAMLIT_API_BASE_URL` | FastAPI origin when backend is `api`, e.g. `http://127.0.0.1:8000`. |
-
-**Docker** (`Dockerfile.streamlit`) and **Compose** (`docker-compose.streamlit.yml`) are documented in **`docs/streamlit-deployment-phase.md`**.
 
 ## Run backend and frontend together
 

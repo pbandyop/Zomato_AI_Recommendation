@@ -1,0 +1,34 @@
+# Render Blueprint — FastAPI backend for this repo.
+# https://render.com/docs/infrastructure-as-code
+#
+# After linking the repo, set secret env vars in the dashboard (or via `sync: false` prompts):
+#   GROQ_API_KEY, CORS_ORIGINS
+# Optional Vercel previews: CORS_ORIGIN_REGEX=https://.*\.vercel\.app
+#
+# Detailed steps: docs/deployment-render-vercel.md
+
+services:
+  - type: web
+    name: zomato-recommend-api
+    runtime: python
+    region: oregon
+    plan: free
+    rootDir: .
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.phase6.app:http_app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: APP_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: API_RATE_LIMIT_PER_MINUTE
+        value: "60"
+      - key: GROQ_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false

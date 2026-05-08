@@ -44,5 +44,19 @@
       "minimum_rating": 4.0,
       "additional_preferences": []
     }
+  },
+  "9c30131c-628d-4c51-aaf3-c5f3e2c5710b": {
+    "session_id": "9c30131c-628d-4c51-aaf3-c5f3e2c5710b",
+    "created_at": "2026-05-08T21:00:13.975461+00:00",
+    "updated_at": "2026-05-08T21:00:13.975461+00:00",
+    "preferences": {
+      "location": "delhi",
+      "budget": "medium",
+      "cuisines": [
+        "north indian"
+      ],
+      "minimum_rating": 4.0,
+      "additional_preferences": []
+    }
   }
 }

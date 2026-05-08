@@ -23,6 +23,7 @@ class AppConfig:
     groq_api_key: str | None
     groq_model: str
     cors_origins: tuple[str, ...]
+    cors_origin_regex: str | None
     api_rate_limit_per_minute: int
     feedback_sqlite_path: Path
     prompt_version: str
@@ -37,6 +38,9 @@ def load_config() -> AppConfig:
         "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000",
     )
     cors_origins = tuple(o.strip() for o in cors_raw.split(",") if o.strip())
+
+    cors_regex_raw = os.getenv("CORS_ORIGIN_REGEX", "").strip()
+    cors_origin_regex = cors_regex_raw or None
 
     rate_raw = os.getenv("API_RATE_LIMIT_PER_MINUTE", "60")
     try:
@@ -66,6 +70,7 @@ def load_config() -> AppConfig:
         groq_api_key=os.getenv("GROQ_API_KEY") or None,
         groq_model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
         cors_origins=cors_origins,
+        cors_origin_regex=cors_origin_regex,
         api_rate_limit_per_minute=api_rate_limit,
         feedback_sqlite_path=feedback_sqlite_path,
         prompt_version=os.getenv("PROMPT_VERSION", "v1"),
