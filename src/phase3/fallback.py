@@ -78,7 +78,7 @@ def _build_fallback_attempts(preferences: UserPreferences) -> list[_Attempt]:
             _Attempt(
                 f"relaxed_rating_to_{relaxed:.1f}",
                 FilterOptions(
-                    require_cuisine_match=False,
+                    require_cuisine_match=True,
                     effective_min_rating=relaxed,
                     budget_mode=BudgetFilterMode.STRICT,
                     location_mode=LocationFilterMode.EXACT,
@@ -90,7 +90,7 @@ def _build_fallback_attempts(preferences: UserPreferences) -> list[_Attempt]:
         _Attempt(
             "expanded_budget",
             FilterOptions(
-                require_cuisine_match=False,
+                require_cuisine_match=True,
                 effective_min_rating=max(MIN_RATING_FLOOR, base_rating - 1.0),
                 budget_mode=BudgetFilterMode.EXPANDED,
                 location_mode=LocationFilterMode.EXACT,
@@ -101,7 +101,7 @@ def _build_fallback_attempts(preferences: UserPreferences) -> list[_Attempt]:
         _Attempt(
             "location_contains",
             FilterOptions(
-                require_cuisine_match=False,
+                require_cuisine_match=True,
                 effective_min_rating=max(MIN_RATING_FLOOR, base_rating - 1.0),
                 budget_mode=BudgetFilterMode.EXPANDED,
                 location_mode=LocationFilterMode.CONTAINS,
@@ -112,7 +112,7 @@ def _build_fallback_attempts(preferences: UserPreferences) -> list[_Attempt]:
         _Attempt(
             "last_resort_global_top_rating",
             FilterOptions(
-                require_cuisine_match=False,
+                require_cuisine_match=True,
                 effective_min_rating=MIN_RATING_FLOOR,
                 budget_mode=BudgetFilterMode.ANY,
                 location_mode=LocationFilterMode.ANY,
@@ -165,7 +165,6 @@ def retrieve_candidates(
     else:
         cuisine_relaxed = apply_rule_based_filters(working, preferences, attempts[1].options)
         if len(cuisine_relaxed) > 0:
-            message = _cuisine_not_available_message(preferences.cuisines)
             logger.info(
                 "Strict retrieval empty but rows exist without cuisine match; skipping cross-cuisine results"
             )
@@ -174,7 +173,7 @@ def retrieve_candidates(
                 applied_fallbacks=["cuisine_not_available"],
                 candidate_count_before_cap=0,
                 preferences_summary=_prefs_summary(preferences),
-                availability_message=message,
+                availability_message=_cuisine_not_found_message(),
             )
 
         applied: list[str] = []
@@ -192,8 +191,13 @@ def retrieve_candidates(
                 break
 
         if selected is None:
-            selected = working.iloc[0:0].copy()
-            applied = ["no_matches"]
+            return RetrievalResult(
+                candidates=[],
+                applied_fallbacks=["no_matches"],
+                candidate_count_before_cap=0,
+                preferences_summary=_prefs_summary(preferences),
+                availability_message=_cuisine_not_found_message(),
+            )
 
     scored = add_retrieval_scores(selected, preferences)
     ranked = sort_by_match_score(scored)
@@ -209,14 +213,9 @@ def retrieve_candidates(
     )
 
 
-def _cuisine_not_available_message(cuisines: list[str]) -> str:
-    parts = [c.strip() for c in cuisines if c and str(c).strip()]
-    if not parts:
-        return "Restaurant with your requested cuisine is not available."
-    if len(parts) == 1:
-        return f"Restaurant with the '{parts[0]}' cuisine is not available."
-    labels = "', '".join(parts)
-    return f"Restaurant with the '{labels}' cuisines is not available."
+def _cuisine_not_found_message() -> str:
+    """Shown when we refuse cross-cuisine fallbacks or have no cuisine-aligned rows."""
+    return "Sorry, restaurants for the requested cuisine were not found."
 
 
 def _prefs_summary(preferences: UserPreferences) -> dict:

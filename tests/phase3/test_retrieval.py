@@ -85,7 +85,7 @@ def test_retrieve_candidates_no_cross_cuisine_when_strict_empty() -> None:
     assert result.candidates == []
     assert result.applied_fallbacks == ["cuisine_not_available"]
     assert result.availability_message == (
-        "Restaurant with the 'north indian' cuisine is not available."
+        "Sorry, restaurants for the requested cuisine were not found."
     )
 
 
