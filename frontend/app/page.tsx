@@ -29,7 +29,6 @@ type Rec = {
 
 type ApiResponse = {
   recommendations: Rec[];
-  applied_fallbacks: string[];
   preferences_summary: Record<string, unknown>;
   model: string;
   guardrail_notes?: string[];
@@ -262,14 +261,6 @@ export default function Home() {
 
       {data && !loading && (
         <section className="results">
-          {data.applied_fallbacks?.length > 0 &&
-            !(data.applied_fallbacks.length === 1 && data.applied_fallbacks[0] === "strict") && (
-              <div className="banner">
-                Search was adjusted so we could show results:{" "}
-                {data.applied_fallbacks.join(", ")}
-              </div>
-            )}
-
           <h2>Top picks for you</h2>
           {data.recommendations.length === 0 ? (
             <p>No recommendations returned. Try relaxing filters.</p>
