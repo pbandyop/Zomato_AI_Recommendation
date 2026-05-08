@@ -11,7 +11,7 @@ This repository contains a phased implementation of an AI-powered restaurant rec
 - `src/phase3/`: candidate retrieval (filters, fallback, scoring, shortlist)
 - `src/phase4/`: Groq LLM ranking, structured response parsing, guardrails
 - `src/phase6/`: FastAPI backend (Phase 6) — API, orchestration, CORS, rate limits
-- `frontend/`: Next.js UI — form + recommendation cards calling the API
+- `frontend/`: Next.js UI — `vercel.json`, `lib/publicApi.ts` (`NEXT_PUBLIC_API_BASE_URL`), Vercel + Render notes in **`docs/deployment-render-vercel.md`**
 - `tests/phase0/` … `tests/phase6/`: phase-wise tests
 
 Production deployment (Render backend + Vercel frontend): see **`docs/deployment-render-vercel.md`**.

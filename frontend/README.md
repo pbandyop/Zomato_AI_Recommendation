@@ -35,3 +35,13 @@ npm start
 ```
 
 For **Vercel** + **Render** API, follow [`docs/deployment-render-vercel.md`](../docs/deployment-render-vercel.md).
+
+### Vercel project settings (monorepo)
+
+| Setting | Value |
+|--------|--------|
+| **Root Directory** | `frontend` |
+| **Framework** | Next.js (or rely on `vercel.json`) |
+| **Environment Variables** | `NEXT_PUBLIC_API_BASE_URL` = `https://your-service.onrender.com` (Production; repeat for Preview if needed) |
+
+Committed assets: `vercel.json`, `.nvmrc` (Node 20), `lib/publicApi.ts` (normalizes base URL, trims trailing `/`).

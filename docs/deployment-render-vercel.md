@@ -84,7 +84,7 @@ Feedback/telemetry SQLite defaults under `logs/`. Render’s filesystem is **eph
 
 1. Import the Git repository in Vercel.
 2. **Root Directory:** `frontend`
-3. **Framework preset:** Next.js (auto from `frontend/package.json`).
+3. **Framework preset:** Next.js (explicit in `frontend/vercel.json`; `package.json` declares `engines.node` ≥ 20).
 
 ### Environment variables
 
@@ -94,16 +94,23 @@ Feedback/telemetry SQLite defaults under `logs/`. Render’s filesystem is **eph
 
 Mirror the same variable for **Preview** / **Development** if you use branch previews (point previews at a staging API or the same Render URL—your choice).
 
-The UI reads this in `frontend/app/page.tsx` via `process.env.NEXT_PUBLIC_API_BASE_URL`.
+The UI resolves the API base in `frontend/lib/publicApi.ts`: it reads `NEXT_PUBLIC_API_BASE_URL`, **strips trailing slashes**, and defaults to `http://127.0.0.1:8000` when unset.
 
 ### Build
 
-Default Vercel flow:
+Recommended flow (also set in `frontend/vercel.json`):
 
 - Install: `npm install` (from `frontend/`)
 - Build: `npm run build`
 
-No custom `vercel.json` is required for the current Next.js 15 layout.
+### Frontend files tied to Vercel
+
+| File | Role |
+|------|------|
+| `frontend/vercel.json` | Framework + explicit install/build commands for the `frontend/` root. |
+| `frontend/.nvmrc` | Node **20** (local tools; Vercel can use **[Project Settings → Node.js Version](https://vercel.com/docs/functions/runtimes/node-js)** to match). |
+| `frontend/lib/publicApi.ts` | Normalizes `NEXT_PUBLIC_API_BASE_URL` for `fetch()` calls. |
+| `frontend/.env.local.example` | Template for local + notes for dashboard env vars. |
 
 ---
 

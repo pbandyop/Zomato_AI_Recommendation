@@ -2,6 +2,8 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
+import { getPublicApiBaseUrl } from "@/lib/publicApi";
+
 type Rec = {
   rank: number;
   record_id: number | null;
@@ -24,8 +26,7 @@ type ApiResponse = {
   guardrail_notes?: string[];
 };
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
+const API_BASE = getPublicApiBaseUrl();
 
 export default function Home() {
   const [location, setLocation] = useState("Bangalore");
@@ -211,8 +212,13 @@ export default function Home() {
         <div className="banner error" role="alert">
           {error}
           <div style={{ marginTop: "0.5rem", fontSize: "0.85rem" }}>
-            Ensure the backend is running:{" "}
+            API: <code>{API_BASE}</code>
+            <br />
+            Local backend:{" "}
             <code>uvicorn src.phase6.app:http_app --reload --port 8000</code>
+            <br />
+            Vercel: set <code>NEXT_PUBLIC_API_BASE_URL</code> to your Render URL
+            (no trailing slash).
           </div>
         </div>
       )}
