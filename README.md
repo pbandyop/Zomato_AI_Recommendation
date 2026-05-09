@@ -2,7 +2,7 @@
 
 This repository contains a phased implementation of an AI-powered restaurant recommendation system for Location: Bangalore, India. It contains list of various restaurents within the City Bangalore. The dataset used is from Hugging Face (Opensource). Dataset link: ManikaSaini/zomato-restaurant-recommendation
 
-# The Website is built using Cursor. The frontend is deployed in Vercel and Backend is deployed in Render.
+## The Website is built using Cursor. The frontend is deployed in Vercel and Backend is deployed in Render.
 Website link: https://zomato-ai-recommendation-pw17.vercel.app/
 
 ## Project Structure
