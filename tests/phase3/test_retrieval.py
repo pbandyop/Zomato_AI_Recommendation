@@ -89,6 +89,51 @@ def test_retrieve_candidates_no_cross_cuisine_when_strict_empty() -> None:
     )
 
 
+def test_retrieve_candidates_unknown_location() -> None:
+    df = _sample_df()
+    prefs = UserPreferences.model_validate(
+        {
+            "location": "Seattle",
+            "budget": "medium",
+            "cuisines": ["north indian"],
+            "minimum_rating": 4.0,
+        }
+    )
+    result = retrieve_candidates(df, prefs, max_candidates=10)
+    assert result.candidates == []
+    assert result.applied_fallbacks == ["location_not_found"]
+    assert result.availability_message == "Location not found."
+
+
+def test_city_name_substring_still_known_location() -> None:
+    """e.g. 'Bangalore' when rows list neighbourhoods but some entries mention the city."""
+
+    df = pd.DataFrame(
+        [
+            {
+                "record_id": 101,
+                "restaurant_name": "City Mention",
+                "location": "btm bangalore",
+                "cuisines": "south indian",
+                "estimated_cost": 400.0,
+                "budget_bucket": "medium",
+                "rating": 4.1,
+                "source": "test",
+            },
+        ]
+    )
+    prefs = UserPreferences.model_validate(
+        {
+            "location": "Bangalore",
+            "budget": "medium",
+            "cuisines": ["south indian"],
+            "minimum_rating": 4.0,
+        }
+    )
+    result = retrieve_candidates(df, prefs, max_candidates=10)
+    assert result.candidate_count_before_cap >= 1
+
+
 def test_retrieve_empty_dataframe() -> None:
     df = pd.DataFrame(
         columns=[

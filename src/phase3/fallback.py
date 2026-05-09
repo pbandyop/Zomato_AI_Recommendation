@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass
 
 import pandas as pd
@@ -108,17 +109,6 @@ def _build_fallback_attempts(preferences: UserPreferences) -> list[_Attempt]:
             ),
         )
     )
-    attempts.append(
-        _Attempt(
-            "last_resort_global_top_rating",
-            FilterOptions(
-                require_cuisine_match=True,
-                effective_min_rating=MIN_RATING_FLOOR,
-                budget_mode=BudgetFilterMode.ANY,
-                location_mode=LocationFilterMode.ANY,
-            ),
-        )
-    )
     return attempts
 
 
@@ -151,6 +141,20 @@ def retrieve_candidates(
         raise ValueError(f"DataFrame missing required columns: {sorted(missing)}")
 
     working = df.copy()
+
+    if not _catalog_lists_requested_location(working, preferences):
+        logger.info(
+            "Requested location=%r does not overlap any catalogue location tokens",
+            preferences.location,
+        )
+        return RetrievalResult(
+            candidates=[],
+            applied_fallbacks=["location_not_found"],
+            candidate_count_before_cap=0,
+            preferences_summary=_prefs_summary(preferences),
+            availability_message=_location_not_found_message(),
+        )
+
     attempts = _build_fallback_attempts(preferences)
 
     strict_filtered = apply_rule_based_filters(working, preferences, attempts[0].options)
@@ -196,7 +200,7 @@ def retrieve_candidates(
                 applied_fallbacks=["no_matches"],
                 candidate_count_before_cap=0,
                 preferences_summary=_prefs_summary(preferences),
-                availability_message=_cuisine_not_found_message(),
+                availability_message=_filters_exhausted_message(),
             )
 
     scored = add_retrieval_scores(selected, preferences)
@@ -216,6 +220,59 @@ def retrieve_candidates(
 def _cuisine_not_found_message() -> str:
     """Shown when we refuse cross-cuisine fallbacks or have no cuisine-aligned rows."""
     return "Sorry, restaurants for the requested cuisine were not found."
+
+
+def _location_not_found_message() -> str:
+    return "Location not found."
+
+
+def _filters_exhausted_message() -> str:
+    return "No matching restaurants were found for your filters."
+
+
+def _catalog_lists_requested_location(df: pd.DataFrame, preferences: UserPreferences) -> bool:
+    """
+    True if the user's location string overlaps the dataset location field in a way retrievals
+    can honor (exact, substring, multi-token, or a catalogue token contained in user's text).
+
+    Covers neighbourhood rows (btm), city names substring in locality (Bangalore),
+    and multi-token queries ("electronic city").
+    """
+
+    raw = preferences.location.strip().lower()
+    if len(raw) < 2:
+        return False
+
+    col_series = df["location"].astype(str).str.lower().str.strip().replace({"nan": ""})
+    nonempty = col_series[col_series.str.len() > 0]
+
+    if nonempty.eq(raw).any():
+        return True
+
+    escaped = re.escape(raw)
+    if nonempty.str.fullmatch(escaped, na=False).any():
+        return True
+
+    mask = nonempty.str.contains(escaped, regex=True, na=False)
+    if mask.any():
+        return True
+
+    for tok in re.split(r"[,\s]+", raw):
+        tl = tok.strip()
+        if len(tl) < 3:
+            continue
+        et = re.escape(tl)
+        if nonempty.eq(tl).any() or nonempty.str.contains(et, regex=True, na=False).any():
+            return True
+
+    for rl in nonempty.unique():
+        if not isinstance(rl, str):
+            rl = str(rl)
+        rls = rl.strip().lower()
+        if len(rls) >= 4 and rls and rls in raw:
+            return True
+
+    return False
 
 
 def _prefs_summary(preferences: UserPreferences) -> dict:

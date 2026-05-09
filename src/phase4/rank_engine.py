@@ -26,7 +26,9 @@ def run_phase4_recommendation(
     if not retrieval.candidates:
         tags: tuple[str, ...] = ()
         msg = retrieval.availability_message
-        if msg:
+        if retrieval.applied_fallbacks and retrieval.applied_fallbacks[0] == "location_not_found":
+            tags = ("location_not_found",)
+        elif msg:
             tags = ("no_matching_cuisine",)
         else:
             tags = ("no_candidates",)
