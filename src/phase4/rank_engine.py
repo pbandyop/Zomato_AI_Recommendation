@@ -55,7 +55,9 @@ def run_phase4_recommendation(
         raw_content = groq_chat_completion(messages, config=cfg)
     except ValueError as exc:
         logger.warning("Groq configuration error: %s", exc)
-        recs = fallback_rankings(retrieval.candidates, limit=top_n)
+        recs = fallback_rankings(
+            retrieval.candidates, limit=top_n, preferences=preferences
+        )
         return Phase4Result(
             recommendations=recs,
             applied_fallbacks=list(retrieval.applied_fallbacks),
@@ -66,7 +68,9 @@ def run_phase4_recommendation(
         )
     except Exception as exc:
         logger.exception("Groq request failed: %s", exc)
-        recs = fallback_rankings(retrieval.candidates, limit=top_n)
+        recs = fallback_rankings(
+            retrieval.candidates, limit=top_n, preferences=preferences
+        )
         return Phase4Result(
             recommendations=recs,
             applied_fallbacks=list(retrieval.applied_fallbacks),
@@ -80,7 +84,9 @@ def run_phase4_recommendation(
         parsed = parse_ranking_response(raw_content)
     except Exception as exc:
         logger.warning("Failed to parse LLM JSON: %s", exc)
-        recs = fallback_rankings(retrieval.candidates, limit=top_n)
+        recs = fallback_rankings(
+            retrieval.candidates, limit=top_n, preferences=preferences
+        )
         return Phase4Result(
             recommendations=recs,
             applied_fallbacks=list(retrieval.applied_fallbacks),
@@ -95,7 +101,9 @@ def run_phase4_recommendation(
 
     if not recs:
         logger.warning("Guardrails removed all LLM rows; using fallback ordering")
-        recs = fallback_rankings(retrieval.candidates, limit=top_n)
+        recs = fallback_rankings(
+            retrieval.candidates, limit=top_n, preferences=preferences
+        )
         notes.append("guardrails_empty_fallback")
 
     recs = recs[:top_n]

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from src.phase2.preferences import UserPreferences
 from src.phase4.models import RankedRecommendation
 
 
@@ -88,7 +89,51 @@ def apply_guardrails(
     return merged, notes
 
 
-def fallback_rankings(candidates: list[dict], *, limit: int = 10) -> list[RankedRecommendation]:
+def _user_facing_fallback_explanation(
+    base: dict,
+    preferences: UserPreferences | None,
+) -> str:
+    """Short copy when we rank from retrieval scores instead of model prose."""
+    name = str(base.get("restaurant_name", "")).strip() or "This restaurant"
+    loc = str(base.get("location", "")).strip()
+    cuis_raw = str(base.get("cuisines", "")).strip()
+    budget = str(base.get("budget_bucket", "")).strip()
+    try:
+        rating = float(base.get("rating", 0.0))
+    except (TypeError, ValueError):
+        rating = 0.0
+
+    cuisine_lead = ""
+    if cuis_raw:
+        cuisine_lead = next((t.strip() for t in cuis_raw.split(",") if t.strip()), "")
+
+    parts: list[str] = []
+    if loc:
+        parts.append(f"in {loc}")
+    if cuisine_lead:
+        parts.append(cuisine_lead)
+    if budget:
+        parts.append(f"{budget} budget")
+    if rating > 0:
+        parts.append(f"rated {rating:.1f}/5")
+
+    tail = "; ".join(parts) if parts else "among the strongest matches for your filters"
+    if preferences is not None:
+        want = ", ".join(preferences.cuisines) if preferences.cuisines else ""
+        area = preferences.location.strip()
+        if want and area:
+            return f"{name} fits your search around {area} for {want} — {tail}."
+        if area:
+            return f"{name} fits your search around {area} — {tail}."
+    return f"{name} — {tail}."
+
+
+def fallback_rankings(
+    candidates: list[dict],
+    *,
+    limit: int = 10,
+    preferences: UserPreferences | None = None,
+) -> list[RankedRecommendation]:
     """Deterministic ranking when LLM fails or guardrails remove everything."""
     sorted_c = sorted(
         candidates,
@@ -107,7 +152,7 @@ def fallback_rankings(candidates: list[dict], *, limit: int = 10) -> list[Ranked
                 budget_bucket=str(base["budget_bucket"]) if base.get("budget_bucket") is not None else None,
                 rating=float(base.get("rating", 0.0)),
                 match_score=float(base.get("match_score", 0.0)),
-                explanation="Ranked by retrieval match score (LLM output missing or invalid).",
+                explanation=_user_facing_fallback_explanation(base, preferences),
                 confidence=0.55,
             )
         )
