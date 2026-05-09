@@ -13,6 +13,9 @@ import {
 
 const TROUBLESHOOT_API_ORIGIN = getPublicApiBaseUrl();
 
+/** Caps API ask and rendered cards — never show more than this on the homepage. */
+const MAX_TOP_RESULTS = 5;
+
 type Rec = {
   rank: number;
   record_id: number | null;
@@ -108,7 +111,7 @@ export default function Home() {
         body: JSON.stringify({
           preferences,
           max_candidates: 30,
-          top_n: 10,
+          top_n: MAX_TOP_RESULTS,
         }),
         signal: publicApiAbortSignal(),
       });
@@ -130,7 +133,10 @@ export default function Home() {
       }
 
       const json = (await res.json()) as ApiResponse;
-      setData(json);
+      setData({
+        ...json,
+        recommendations: json.recommendations.slice(0, MAX_TOP_RESULTS),
+      });
       const runHeader = res.headers.get("X-Recommendation-Run-Id");
       if (runHeader) setRecommendationRunId(runHeader);
     } catch (err) {
